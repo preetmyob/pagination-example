@@ -1,0 +1,230 @@
+openapi: 3.0.1
+info:
+  title: Sites API
+  description: A production-ready ASP.NET 9 Web API for managing sites with pagination and filtering capabilities
+  version: '1.0'
+  contact:
+    name: Sites API Support
+    email: support@example.com
+servers:
+  - url: https://localhost:7000
+    description: Development server
+  - url: http://localhost:5000
+    description: Development server (HTTP)
+paths:
+  /api/sites:
+    get:
+      tags:
+        - Sites
+      summary: Retrieves sites with pagination and optional filtering
+      description: Get a paginated list of sites with optional name filtering
+      parameters:
+        - name: page
+          in: query
+          description: Page number (default: 1)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 1
+            minimum: 1
+        - name: size
+          in: query
+          description: Page size (default: 10, max: 1000)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+            minimum: 1
+            maximum: 1000
+        - name: filter
+          in: query
+          description: JSON filter string (optional)
+          required: false
+          schema:
+            type: string
+          example: '{"siteName": "alpha"}'
+      responses:
+        '200':
+          description: Returns the paginated list of sites
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResultOfSite'
+              example:
+                items:
+                  - siteId: 1
+                    siteName: "Alpha Site"
+                    siteUrl: "https://alpha.example.com"
+                    siteX: 10.5
+                    siteY: 20.3
+                  - siteId: 4
+                    siteName: "Alpha Beta"
+                    siteUrl: "https://alphabeta.com"
+                    siteX: 22.1
+                    siteY: 30.4
+                totalCount: 2
+                pageNumber: 1
+                pageSize: 10
+                totalPages: 1
+                hasPrevious: false
+                hasNext: false
+        '400':
+          description: If the filter JSON is invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Invalid JSON filter format"
+        '500':
+          description: If there was an internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Internal server error"
+  /api/sites/search:
+    post:
+      tags:
+        - Sites
+      summary: Searches sites using POST request with complex filtering
+      description: Search sites with pagination and filtering using a POST request body
+      requestBody:
+        description: Search request containing pagination and filter parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SitesRequest'
+            example:
+              page: 1
+              size: 10
+              filter:
+                siteName: "test"
+      responses:
+        '200':
+          description: Returns the paginated list of sites
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResultOfSite'
+        '400':
+          description: If the request is invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: If there was an internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+components:
+  schemas:
+    Site:
+      type: object
+      properties:
+        siteId:
+          type: integer
+          format: int32
+          description: Unique identifier for the site
+        siteName:
+          type: string
+          description: Name of the site
+        siteUrl:
+          type: string
+          description: URL of the site
+        siteX:
+          type: number
+          format: double
+          description: X coordinate of the site
+        siteY:
+          type: number
+          format: double
+          description: Y coordinate of the site
+      required:
+        - siteId
+        - siteName
+        - siteUrl
+        - siteX
+        - siteY
+    SiteFilter:
+      type: object
+      properties:
+        siteName:
+          type: string
+          nullable: true
+          description: Filter by site name (partial match, case-insensitive)
+    SitesRequest:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          default: 1
+          description: Page number (1-based, default: 1)
+        size:
+          type: integer
+          format: int32
+          default: 10
+          description: Page size (default: 10, max: 1000)
+        filter:
+          $ref: '#/components/schemas/SiteFilter'
+      required:
+        - page
+        - size
+        - filter
+    PaginatedResultOfSite:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Site'
+          description: The items in the current page
+        totalCount:
+          type: integer
+          format: int32
+          description: Total number of items across all pages
+        pageNumber:
+          type: integer
+          format: int32
+          description: Current page number (1-based)
+        pageSize:
+          type: integer
+          format: int32
+          description: Number of items per page
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages
+        hasPrevious:
+          type: boolean
+          description: Indicates if there is a previous page
+        hasNext:
+          type: boolean
+          description: Indicates if there is a next page
+      required:
+        - items
+        - totalCount
+        - pageNumber
+        - pageSize
+        - totalPages
+        - hasPrevious
+        - hasNext
