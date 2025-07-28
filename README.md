@@ -4,14 +4,45 @@ A production-ready ASP.NET 9 Web API for managing sites with comprehensive pagin
 
 ## Features
 
-- **ASP.NET 9 Web API** with clean architecture
-- **MySQL 8** database with Dapper ORM
-- **Comprehensive pagination** with metadata
-- **Flexible filtering** by site name (case-insensitive partial matching)
-- **Two API endpoints**: GET with query parameters and POST with request body
-- **BDD test suite** using ReqnRoll (SpecFlow successor)
-- **OpenAPI/Swagger** documentation
-- **Production-ready** error handling and logging
+### Core API Capabilities
+- **ASP.NET 9 Web API** with clean architecture pattern
+- **MySQL 8** database integration using Dapper ORM
+- **Two API endpoints** for maximum flexibility:
+  - `GET /api/sites` - Query parameter based requests
+  - `POST /api/sites/search` - Request body based searches
+
+### Pagination Features
+- **Smart pagination** with comprehensive metadata response
+- **Default page size** of 10 items with customizable sizing
+- **Maximum page size** enforcement (1000 items max)
+- **Automatic parameter correction**:
+  - Invalid page numbers (≤0) corrected to page 1
+  - Invalid page sizes (≤0) corrected to default size 10
+  - Oversized page requests (>1000) limited to 1000
+- **Navigation metadata** including `hasPrevious`, `hasNext`, `totalPages`
+- **Beyond-data handling** - graceful responses for pages beyond available data
+
+### Filtering Capabilities
+- **Case-insensitive partial matching** on site names
+- **Exact name matching** support
+- **Empty filter handling** - returns all sites when filter is empty
+- **Combined filtering and pagination** - filters work seamlessly with pagination
+- **Flexible filter formats**:
+  - JSON string in query parameters: `filter={"siteName":"alpha"}`
+  - JSON object in POST request body: `"filter": {"siteName": "alpha"}`
+
+### Data Validation & Error Handling
+- **JSON validation** with proper 400 Bad Request responses for malformed filters
+- **Parameter validation** with automatic correction rather than rejection
+- **Robust error responses** with meaningful error messages
+- **Production-ready** error handling for database and system failures
+
+### Testing & Documentation
+- **Comprehensive BDD test suite** using ReqnRoll (20 test scenarios)
+- **Living documentation** through Gherkin feature files
+- **Integration testing** with full HTTP request/response cycle validation
+- **OpenAPI/Swagger** documentation with interactive UI
+- **Test coverage** for all pagination, filtering, and error scenarios
 
 ## Prerequisites
 
